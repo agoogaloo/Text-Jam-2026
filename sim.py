@@ -6,6 +6,8 @@ import chars
 width = 50
 height = 20
 
+brushType = "place"
+selected = "Delete"
 mouseX = int(width / 2)
 mouseY = int(height / 2)
 
@@ -29,6 +31,9 @@ def simulate():
     global updatedTiles
     stateBuffer = [[currState[y][x] for x in range(0, width)] for y in range(0, height)]
     updatedTiles = set()
+
+    if brushType == "stream":
+        place(selected)
 
     for y in range(0, height):
         for x in range(0, width):
@@ -86,11 +91,15 @@ def swapTile(
     swapTypes: List[str],
     state: List[List[str]],
 ):
+    # don't go past edge of screen
+    if endX < 0 or endX >= width or endY < 0 or endY >= height:
+        return False
+
     # find tile where we're sswapping
     ch = state[endY][endX]
 
     # if its empty, move
-    if ch==chars.empty:
+    if ch == chars.empty:
         state[endY][endX] = char
         state[stY][stX] = chars.empty
         return True
@@ -101,7 +110,7 @@ def swapTile(
     # check new tile
     ch = state[endY][endX]
     # if it moved, we can go there
-    if ch==chars.empty:
+    if ch == chars.empty:
         state[endY][endX] = char
         state[stY][stX] = chars.empty
         return True
@@ -159,11 +168,11 @@ def waterSim(x: int, y: int, state: List[List[str]]):
 
 def sandSim(x: int, y: int, state: List[List[str]]):
     if y < height - 1:
-        if swapTile(x,y,x,y+1,chars.sand, [chars.water], state):
+        if swapTile(x, y, x, y + 1, chars.sand, [chars.water], state):
             return
-        if swapTile(x,y,x-1,y+1,chars.sand, [chars.water], state):
+        if swapTile(x, y, x - 1, y + 1, chars.sand, [chars.water], state):
             return
-        if swapTile(x,y,x+1,y+1,chars.sand, [chars.water], state):
+        if swapTile(x, y, x + 1, y + 1, chars.sand, [chars.water], state):
             return
 
 
@@ -171,6 +180,7 @@ def input(inp: str):
     global mouseY
     global mouseX
     global currState
+    global brushType
 
     if inp == "up":
         mouseY = max(0, mouseY - 1)
@@ -180,7 +190,20 @@ def input(inp: str):
         mouseX = max(0, mouseX - 1)
     elif inp == "right":
         mouseX = min(width - 1, mouseX + 1)
-    elif inp == "Sand":
+    elif inp == "Reset":
+        currState = [[" " for i in range(0, width)] for y in range(0, height)]
+    elif inp == "Stream":
+        brushType = "stream"
+    elif inp == "Place":
+        brushType = "place"
+    else:
+        place(inp)
+
+
+def place(inp: str):
+    global selected
+
+    if inp == "Sand":
         currState[mouseY][mouseX] = chars.sand
     elif inp == "Water":
         currState[mouseY][mouseX] = chars.water
@@ -188,6 +211,7 @@ def input(inp: str):
         currState[mouseY][mouseX] = chars.empty
     elif inp == "Block":
         currState[mouseY][mouseX] = chars.wall
-    elif inp == "Reset":
-        currState = [[" " for i in range(0, width)] for y in range(0, height)]
+    else:
+        return
 
+    selected = inp
