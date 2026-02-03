@@ -172,19 +172,22 @@ def input(inp: str):
     global mouseX
     global currState
 
-    if inp == "u":
+    if inp == "up":
         mouseY = max(0, mouseY - 1)
-    elif inp == "d":
+    elif inp == "down":
         mouseY = min(height - 1, mouseY + 1)
-    elif inp == "l":
+    elif inp == "left":
         mouseX = max(0, mouseX - 1)
-    elif inp == "r":
+    elif inp == "right":
         mouseX = min(width - 1, mouseX + 1)
-    elif inp == "sand":
+    elif inp == "Sand":
         currState[mouseY][mouseX] = chars.sand
-    elif inp == "water":
+    elif inp == "Water":
         currState[mouseY][mouseX] = chars.water
-    elif inp == "delete":
+    elif inp == "Delete":
         currState[mouseY][mouseX] = chars.empty
-    elif inp == "wall":
+    elif inp == "Block":
         currState[mouseY][mouseX] = chars.wall
+    elif inp == "Reset":
+        currState = [[" " for i in range(0, width)] for y in range(0, height)]
+

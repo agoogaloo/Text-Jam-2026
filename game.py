@@ -1,22 +1,15 @@
+import enum
 import chars as ch
 import sim
+import inputParser as inp
 
 title = "SAND SIMULATOR!"
+shouldClear = True
 
 screenWidth = sim.width
 screenHeight = sim.height
 
 screen = [" " * screenWidth] * screenHeight
-
-controls = [
-    "--==Controls==--",
-    ch.cursor + " | Cursor | hjkl/Arrows",
-    ch.empty + " | Empty  | d",
-    ch.wall + " | Wall   | Space",
-    ch.sand + " | Sand   | s",
-    ch.water + " | Water  | w",
-    "  | Quit   | Esc/^C",
-]
 
 
 def clearScreen():
@@ -29,15 +22,15 @@ def drawScreen(clear=False):
 
     # print((" " * (screenWidth + 3) + "\n") * 2, flush=True)
     if clear:
-        print("\033[1J")
+        print("\033[2J")
+        print("\033[F" * 20, end="")
+        print("\033[F\033[2K" * (screenHeight), end="")
 
-        # print("\033[F" * 6, end="")
-        # print("\033[F\033[2K" * (screenHeight), end="")
-
-    print("\n\n    --==" + title + "==--   ")
+    print("\n    --==" + title + "==--   ")
     print(ch.tlCorn + (ch.hLine * screenWidth) + ch.trCorn)
 
     height = 0
+    controls = inp.getControls()
     for i in screen:
         i = i[0:screenWidth]
         contLine = ""
@@ -83,8 +76,7 @@ def render():
     # draw(["-="+title+"=-"], 2,0, screen)
     draw(sim.getTextImg(), 0, 0, screen)
     draw([ch.cursor], sim.mouseX, sim.mouseY, screen)
-    drawScreen(True)
-    # drawScreen(False)
+    drawScreen(shouldClear)
     return
 
 
@@ -93,9 +85,23 @@ def simulate():
     render()
 
 
-def input(inp: str):
-    if inp == "exit":
-        quit()
-    sim.input(inp)
+def input(com: str):
+    global shouldClear
 
-    render()
+    if com == "Exit":
+        quit()
+    elif com == "Term Clear":
+        shouldClear = not shouldClear
+    else:
+        sim.input(com)
+        render()
+
+
+def save():
+    contents = ""
+    for line in sim.currState:
+        for ch in line:
+            contents += ch
+        contents += "\n"
+
+    pass

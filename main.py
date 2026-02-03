@@ -4,47 +4,46 @@ from threading import Thread
 from pynput import keyboard
 
 import game
+import inputParser as inpParse
 
 
 run = True
+simDelay = 0.5
 def on_press(key):
     global game
     global run
+    global simDelay
     inp = ""
     try:
-        if key.char == "k":
-            inp = "u"
-        elif key.char == "j":
-            inp = "d"
-            print("SSSS")
-        elif key.char == "h":
-            inp = "l"
-        elif key.char == "l":
-            inp = "r"
-        elif key.char == "w":
-            inp = "water"
-        elif key.char == "s":
-            inp = "sand"
-        elif key.char == "d":
-            inp = "delete"
+        inp = key.char
     except AttributeError:
         if key == keyboard.Key.up:
-            inp = "u"
+            inp = "k"
         elif key == keyboard.Key.down:
-            inp = "d"
+            inp = "j"
         elif key == keyboard.Key.left:
-            inp = "l"
+            inp = "h"
         elif key == keyboard.Key.right:
-            inp = "r"
+            inp = "l"
         elif key == keyboard.Key.esc:
-            inp = "exit"
-            run = False
-            exit()
+            inp = "esc"
         elif key == keyboard.Key.space:
-            inp = "wall"
+            inp = " "
 
-    if inp != "":
-        time.sleep(0.0001)
+    
+    inp = inpParse.parseInput(inp)
+    print("state:"+inpParse.mode)
+    print("Com:"+inp)
+    if inp == "Sim spd-":
+        simDelay*=1.25;
+    elif inp == "Sim spd+":
+        simDelay/=1.25;
+    elif inp == "Quit":
+        run = False
+        quit()
+
+    elif inp != "None":
+        time.sleep(0.0005)
         game.input(inp)
 
 
@@ -52,7 +51,6 @@ def on_press(key):
 listner = keyboard.Listener(on_press=on_press)
 listner.start()
 
-simDelay = 0.5
 
 while run:
     game.simulate()
