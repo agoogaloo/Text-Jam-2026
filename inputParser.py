@@ -28,6 +28,7 @@ commands = {
         " ": "Block",
         "w": "Water",
         "s": "Sand",
+        "f": "Fish",
         "d": "Delete",
         "h": "left",
         "l": "right",
@@ -72,6 +73,7 @@ def getControls():
         img.append(chars.wall + " | Wall   | Space")
         img.append(chars.sand + " | Sand   | s")
         img.append(chars.water + " | Water  | w")
+        img.append(chars.fishL + " | Fish   | f")
         img.append("  | Brush  | b")
         img.append("  | Norm   | esc")
     else:

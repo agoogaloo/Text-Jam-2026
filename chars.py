@@ -10,4 +10,10 @@ empty = " "
 cursor = "◉"
 wall = "▩"
 sand = "*"
-water = "~"
+water = "≈"
+fishL = "◄"
+fishR = "►"
+grave = "±"
+
+
+

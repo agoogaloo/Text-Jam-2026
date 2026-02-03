@@ -29,7 +29,6 @@ def getTextImg():
 def simulate():
     global currState
     global updatedTiles
-    stateBuffer = [[currState[y][x] for x in range(0, width)] for y in range(0, height)]
     updatedTiles = set()
 
     if brushType == "stream":
@@ -37,9 +36,9 @@ def simulate():
 
     for y in range(0, height):
         for x in range(0, width):
-            simTile(x, y, stateBuffer)
+            simTile(x, y, currState)
 
-    currState = stateBuffer
+    # currState = stateBuffer
 
 
 def simTile(x: int, y: int, stateBuffer: List[List[str]]):
@@ -52,6 +51,12 @@ def simTile(x: int, y: int, stateBuffer: List[List[str]]):
         sandSim(x, y, stateBuffer)
     elif currState[y][x] == chars.water:
         waterSim(x, y, stateBuffer)
+    elif currState[y][x] == chars.fishL:
+        fishLsim(x, y, stateBuffer)
+    elif currState[y][x] == chars.fishR:
+        fishRsim(x, y, stateBuffer)
+    elif currState[y][x] == chars.grave:
+        gravesim(x, y, stateBuffer)
 
     return
 
@@ -90,6 +95,7 @@ def swapTile(
     char: str,
     swapTypes: List[str],
     state: List[List[str]],
+    emptyOk=True,
 ):
     # don't go past edge of screen
     if endX < 0 or endX >= width or endY < 0 or endY >= height:
@@ -99,7 +105,7 @@ def swapTile(
     ch = state[endY][endX]
 
     # if its empty, move
-    if ch == chars.empty:
+    if emptyOk and ch == chars.empty:
         state[endY][endX] = char
         state[stY][stX] = chars.empty
         return True
@@ -110,7 +116,7 @@ def swapTile(
     # check new tile
     ch = state[endY][endX]
     # if it moved, we can go there
-    if ch == chars.empty:
+    if emptyOk and ch == chars.empty:
         state[endY][endX] = char
         state[stY][stX] = chars.empty
         return True
@@ -125,6 +131,10 @@ def swapTile(
     # otherwise we can't
     return False
 
+def getCh(x:int, y:int, state: List[List[str]] = currState):
+    if 0<x<=width or 0<y<=height:
+        return state[y][x]
+    return chars.wall
 
 def waterSim(x: int, y: int, state: List[List[str]]):
 
@@ -176,6 +186,71 @@ def sandSim(x: int, y: int, state: List[List[str]]):
             return
 
 
+def fishUpDown(x: int, y: int, char: str, state: List[List[str]]):
+    # try to move up/down
+    if swapTile(x, y, x, y + 1, char, [chars.water], state, False):
+        return True
+    if swapTile(x, y, x, y - 1, char, [chars.water], state, False):
+        return True
+    return False
+
+
+def fishRsim(x: int, y: int, state: List[List[str]]):
+
+    # try to move vertically if there's an edge of water, or touching fish
+    if (
+        getCh(x+1, y) == chars.empty
+        or getCh(x+1,y) in (chars.fishR, chars.fishL)
+        or getCh(x-1,y) in (chars.fishL, chars.fishR)
+    ):
+        if fishUpDown(x, y, chars.fishR, state):
+            return
+
+    # swim foreward
+    if swapTile(x, y, x + 1, y, chars.fishR, [chars.water], state, False):
+        return
+
+    # try to turn
+    if getCh(x - 1, y) == chars.water:
+        state[y][x] = chars.fishL
+        return
+
+    if fishUpDown(x, y, chars.fishR, state):
+        return
+    # there's no water, so its dead :(
+    state[y][x] = chars.grave
+
+
+def fishLsim(x: int, y: int, state: List[List[str]]):
+
+    # try to swin down if there's an edge of water
+    if (
+        getCh(x-1, y) == chars.empty
+        or getCh(x+1,y) in (chars.fishR, chars.fishL)
+        or getCh(x-1,y) in (chars.fishL, chars.fishR)
+    ):
+        if fishUpDown(x, y, chars.fishR, state):
+            return
+    # swim foreward
+    if swapTile(x, y, x - 1, y, chars.fishL, [chars.water], state, False):
+        return
+
+    # try to turn
+    if getCh(x + 1, y) == chars.water:
+        state[y][x] = chars.fishR
+        return
+
+    # try to move up/down
+    if fishUpDown(x, y, chars.fishR, state):
+        return
+    # there's no water, so its dead :(
+    state[y][x] = chars.grave
+
+
+def gravesim(x: int, y: int, state: List[List[str]]):
+    swapTile(x, y, x, y + 1, chars.grave, [chars.water], state)
+
+
 def input(inp: str):
     global mouseY
     global mouseX
@@ -211,6 +286,8 @@ def place(inp: str):
         currState[mouseY][mouseX] = chars.empty
     elif inp == "Block":
         currState[mouseY][mouseX] = chars.wall
+    elif inp == "Fish":
+        currState[mouseY][mouseX] = chars.fishL
     else:
         return
 
