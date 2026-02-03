@@ -1,22 +1,16 @@
 from sys import builtin_module_names
 from typing import List
+import math
 import chars
 
-width = 20
-height = 8
+width = 50
+height = 20
 
 mouseX = int(width / 2)
 mouseY = int(height / 2)
 
 currState = [[" " for i in range(0, width)] for y in range(0, height)]
 updatedTiles = set()
-
-currState[0][0] = chars.sand
-currState[0][2] = chars.sand
-currState[1][2] = chars.sand
-currState[2][2] = chars.sand
-currState[3][2] = chars.sand
-currState[0][3] = chars.sand
 
 
 def getTextImg():
@@ -44,14 +38,16 @@ def simulate():
 
 
 def simTile(x: int, y: int, stateBuffer: List[List[str]]):
-    updateStr = "x" + str(x) + "y" + str(y)
-    if updateStr in updatedTiles:
+    if (x, y) in updatedTiles:
         return
+
+    updatedTiles.add((x, y))
 
     if currState[y][x] == chars.sand:
         sandSim(x, y, stateBuffer)
+    elif currState[y][x] == chars.water:
+        waterSim(x, y, stateBuffer)
 
-    updatedTiles.add(updateStr)
     return
 
 
@@ -64,7 +60,7 @@ def moveTile(
     state: List[List[str]],
     replacechar=chars.empty,
 ):
-    if endX < 0 or endX > width or endY < 0 or endY > height:
+    if endX < 0 or endX >= width or endY < 0 or endY >= height:
         return False
 
     if state[endY][endX] == chars.empty:
@@ -81,14 +77,93 @@ def moveTile(
     return False
 
 
+def swapTile(
+    stX: int,
+    stY: int,
+    endX: int,
+    endY: int,
+    char: str,
+    swapTypes: List[str],
+    state: List[List[str]],
+):
+    # find tile where we're sswapping
+    ch = state[endY][endX]
+
+    # if its empty, move
+    if ch==chars.empty:
+        state[endY][endX] = char
+        state[stY][stX] = chars.empty
+        return True
+
+    # otherwise, see if it would move out of the way
+    simTile(endX, endY, state)
+
+    # check new tile
+    ch = state[endY][endX]
+    # if it moved, we can go there
+    if ch==chars.empty:
+        state[endY][endX] = char
+        state[stY][stX] = chars.empty
+        return True
+
+    # otherwise we can swap
+    if ch in swapTypes:
+        state[stY][stX] = ch
+        state[endY][endX] = char
+        updatedTiles.add((endX, endY))
+        return True
+
+    # otherwise we can't
+    return False
+
+
+def waterSim(x: int, y: int, state: List[List[str]]):
+
+    # try to fall
+    if moveTile(x, y, x, y + 1, chars.water, state):
+        return
+
+    canLeft = True
+    canRight = True
+    dist = 1
+    # can fall off any ledge within 3 tiles
+    while dist <= 3 and (canLeft or canRight):
+        canLeft = canLeft and 0 <= x - dist and state[y][x - dist] == chars.empty
+        canRight = canRight and x + dist < width and state[y][x + dist] == chars.empty
+        if canLeft and moveTile(x, y, x - dist, y + 1, chars.water, state):
+            return
+
+        if canRight and moveTile(x, y, x + dist, y + 1, chars.water, state):
+            return
+
+        dist += 1
+
+    # see if it should get pushed by water above
+    if y > 0 and state[y - 1][x] == chars.water:
+        dist = 1
+        canLeft = True
+        canRight = True
+        while canLeft or canRight:
+            if canLeft and moveTile(x, y, x - dist, y, chars.water, state):
+                return
+
+            if canRight and moveTile(x, y, x + dist, y, chars.water, state):
+                return
+
+            canLeft = canLeft and 0 <= x - dist and state[y][x - dist] == chars.water
+            canRight = (
+                canRight and x + dist < width and state[y][x + dist] == chars.water
+            )
+            dist += 1
+
+
 def sandSim(x: int, y: int, state: List[List[str]]):
     if y < height - 1:
-
-        if moveTile(x, y, x, y + 1, chars.sand, state):
+        if swapTile(x,y,x,y+1,chars.sand, [chars.water], state):
             return
-        if moveTile(x, y, x - 1, y + 1, chars.sand, state):
+        if swapTile(x,y,x-1,y+1,chars.sand, [chars.water], state):
             return
-        if moveTile(x, y, x + 1, y + 1, chars.sand, state):
+        if swapTile(x,y,x+1,y+1,chars.sand, [chars.water], state):
             return
 
 
@@ -107,3 +182,9 @@ def input(inp: str):
         mouseX = min(width - 1, mouseX + 1)
     elif inp == "sand":
         currState[mouseY][mouseX] = chars.sand
+    elif inp == "water":
+        currState[mouseY][mouseX] = chars.water
+    elif inp == "delete":
+        currState[mouseY][mouseX] = chars.empty
+    elif inp == "wall":
+        currState[mouseY][mouseX] = chars.wall

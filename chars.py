@@ -7,5 +7,7 @@ trCorn = "┐"
 brCorn = "┘"
 
 empty = " "
-cursor = "◻"
+cursor = "◉"
+wall = "▩"
 sand = "*"
+water = "~"

@@ -1,13 +1,22 @@
 import chars as ch
 import sim
 
+title = "SAND SIMULATOR!"
 
-title = "SAND!!!"
-
-screenWidth =sim.width
-screenHeight =sim.height 
+screenWidth = sim.width
+screenHeight = sim.height
 
 screen = [" " * screenWidth] * screenHeight
+
+controls = [
+    "--==Controls==--",
+    ch.cursor + " | Cursor | hjkl/Arrows",
+    ch.empty + " | Empty  | d",
+    ch.wall + " | Wall   | Space",
+    ch.sand + " | Sand   | s",
+    ch.water + " | Water  | w",
+    "  | Quit   | Esc/^C",
+]
 
 
 def clearScreen():
@@ -20,16 +29,26 @@ def drawScreen(clear=False):
 
     # print((" " * (screenWidth + 3) + "\n") * 2, flush=True)
     if clear:
-        print("\033[F" *  3, end="")
-        print("\033[F\033[2K" * (screenHeight ), end="")
+        print("\033[1J")
 
-    print("    --=="+title+"==--   ")
+        # print("\033[F" * 6, end="")
+        # print("\033[F\033[2K" * (screenHeight), end="")
+
+    print("\n\n    --==" + title + "==--   ")
     print(ch.tlCorn + (ch.hLine * screenWidth) + ch.trCorn)
+
+    height = 0
     for i in screen:
         i = i[0:screenWidth]
-        print(ch.vLine + i + ch.vLine)
+        contLine = ""
+        if height < len(controls):
+            contLine = " " + controls[height]
+
+        print(ch.vLine + i + ch.vLine + contLine)
+        height += 1
+
     print(ch.blCorn + (ch.hLine * screenWidth) + ch.brCorn)
-    print("* - sand | "+ch.cursor+" - selection")
+    # print("x:" + (str)(sim.mouseX) + " y:" + (str)(sim.mouseY))
     # print((" " * (screenWidth + 3) + "\n") * 2, flush=True)
 
     clearScreen()
@@ -54,18 +73,18 @@ def draw(stringArr, drawX: int, drawY: int, target):
         if drawY + y < 0:
             continue
 
-
         line = target[drawY + y]
         target[drawY + y] = (
             line[0:drawX] + stringArr[y] + line[drawX + len(stringArr[y]) : :]
         )
 
+
 def render():
     # draw(["-="+title+"=-"], 2,0, screen)
-    draw(sim.getTextImg(), 0,0, screen)
+    draw(sim.getTextImg(), 0, 0, screen)
     draw([ch.cursor], sim.mouseX, sim.mouseY, screen)
-    # drawScreen(True)
-    drawScreen(False)
+    drawScreen(True)
+    # drawScreen(False)
     return
 
 
@@ -75,9 +94,8 @@ def simulate():
 
 
 def input(inp: str):
-    if(inp=="q"):
-        exit()
+    if inp == "exit":
+        quit()
     sim.input(inp)
 
     render()
-
