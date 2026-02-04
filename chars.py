@@ -1,4 +1,3 @@
-
 hLine = "─"
 vLine = "│"
 tlCorn = "┌"
@@ -11,9 +10,7 @@ cursor = "◉"
 wall = "▩"
 sand = "*"
 water = "≈"
+waterAlt = "~"
 fishL = "◄"
 fishR = "►"
 grave = "±"
-
-
-

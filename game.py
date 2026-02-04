@@ -1,15 +1,19 @@
 import enum
+from os.path import exists
 import chars as ch
 import sim
 import inputParser as inp
 
 title = "SAND SIMULATOR!"
 shouldClear = False
+paused = False
 
 screenWidth = sim.width
 screenHeight = sim.height
 
 screen = [" " * screenWidth] * screenHeight
+
+savePath = "simSave.txt"
 
 
 def clearScreen():
@@ -81,20 +85,46 @@ def render():
 
 
 def simulate():
+    if paused:
+        return
     sim.simulate()
     render()
 
 
 def input(com: str):
     global shouldClear
+    global path
+    global paused
+    global textIn
 
-    if com == "Exit":
-        quit()
+    if com == "Pause":
+        paused = not paused
+    elif com == "Save":
+        save()
+    elif com == "Load":
+        load(savePath)
+
     elif com == "Term Clear":
         shouldClear = not shouldClear
     else:
         sim.input(com)
         render()
+
+def load(file:str):
+    if not exists(file):
+        return
+
+    contents = open(file).read().split("\n")
+    simState = []
+    for line in contents:
+        l = []
+        for char in line:
+            l.append(char+"")
+        simState.append(l)
+
+    sim.currState = simState
+
+    
 
 
 def save():
@@ -104,4 +134,7 @@ def save():
             contents += ch
         contents += "\n"
 
-    pass
+    with open(savePath, "wt")  as file:
+        file.write(contents)
+
+

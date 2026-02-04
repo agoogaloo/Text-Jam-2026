@@ -8,7 +8,7 @@ import inputParser as inpParse
 
 
 run = True
-simDelay = 0.5
+simDelay = 0.25
 def on_press(key):
     global game
     global run
@@ -32,15 +32,13 @@ def on_press(key):
 
     
     inp = inpParse.parseInput(inp)
-    print("state:"+inpParse.mode)
-    print("Com:"+inp)
     if inp == "Sim spd-":
         simDelay*=1.25;
     elif inp == "Sim spd+":
         simDelay/=1.25;
     elif inp == "Quit":
         run = False
-        quit()
+        input("enter to quit")
 
     elif inp != "None":
         time.sleep(0.0005)
@@ -55,9 +53,5 @@ listner.start()
 while run:
     game.simulate()
     time.sleep(simDelay)
-
-
-
-
 
 

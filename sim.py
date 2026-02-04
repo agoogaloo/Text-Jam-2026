@@ -2,6 +2,7 @@ from sys import builtin_module_names
 from typing import List
 import math
 import chars
+import random
 
 width = 50
 height = 20
@@ -30,15 +31,16 @@ def simulate():
     global currState
     global updatedTiles
     updatedTiles = set()
+    stateBuffer = [[currState[y][x] for x in range(0, width)] for y in range(0, height)]
 
     if brushType == "stream":
         place(selected)
 
     for y in range(0, height):
         for x in range(0, width):
-            simTile(x, y, currState)
+            simTile(x, y, stateBuffer)
 
-    # currState = stateBuffer
+    currState = stateBuffer
 
 
 def simTile(x: int, y: int, stateBuffer: List[List[str]]):
@@ -131,10 +133,12 @@ def swapTile(
     # otherwise we can't
     return False
 
-def getCh(x:int, y:int, state: List[List[str]] = currState):
-    if 0<x<=width or 0<y<=height:
+
+def getCh(x: int, y: int, state: List[List[str]]):
+    if 0 < x <= width or 0 < y <= height:
         return state[y][x]
     return chars.wall
+
 
 def waterSim(x: int, y: int, state: List[List[str]]):
 
@@ -175,6 +179,19 @@ def waterSim(x: int, y: int, state: List[List[str]]):
             )
             dist += 1
 
+    # otherwise do a random left/right
+    left = random.randrange(0, 2) == 0
+    if left:
+        if moveTile(x, y, x - 1, y, chars.water, state):
+            return
+
+    if moveTile(x, y, x + 1, y, chars.water, state):
+        return
+
+    if not left:
+        if moveTile(x, y, x + 1, y, chars.water, state):
+            return
+
 
 def sandSim(x: int, y: int, state: List[List[str]]):
     if y < height - 1:
@@ -199,9 +216,9 @@ def fishRsim(x: int, y: int, state: List[List[str]]):
 
     # try to move vertically if there's an edge of water, or touching fish
     if (
-        getCh(x+1, y) == chars.empty
-        or getCh(x+1,y) in (chars.fishR, chars.fishL)
-        or getCh(x-1,y) in (chars.fishL, chars.fishR)
+        getCh(x + 1, y, state) == chars.empty
+        or getCh(x + 1, y, state) in (chars.fishR, chars.fishL)
+        or getCh(x - 1, y, state) in (chars.fishL, chars.fishR)
     ):
         if fishUpDown(x, y, chars.fishR, state):
             return
@@ -211,11 +228,11 @@ def fishRsim(x: int, y: int, state: List[List[str]]):
         return
 
     # try to turn
-    if getCh(x - 1, y) == chars.water:
+    if getCh(x - 1, y, state) == chars.water:
         state[y][x] = chars.fishL
         return
 
-    if fishUpDown(x, y, chars.fishR, state):
+    if fishUpDown(x, y, chars.fishL, state):
         return
     # there's no water, so its dead :(
     state[y][x] = chars.grave
@@ -225,9 +242,9 @@ def fishLsim(x: int, y: int, state: List[List[str]]):
 
     # try to swin down if there's an edge of water
     if (
-        getCh(x-1, y) == chars.empty
-        or getCh(x+1,y) in (chars.fishR, chars.fishL)
-        or getCh(x-1,y) in (chars.fishL, chars.fishR)
+        getCh(x - 1, y, state) == chars.empty
+        or getCh(x + 1, y, state) in (chars.fishR, chars.fishL)
+        or getCh(x - 1, y, state) in (chars.fishL, chars.fishR)
     ):
         if fishUpDown(x, y, chars.fishR, state):
             return
@@ -236,7 +253,7 @@ def fishLsim(x: int, y: int, state: List[List[str]]):
         return
 
     # try to turn
-    if getCh(x + 1, y) == chars.water:
+    if getCh(x + 1, y, state) == chars.water:
         state[y][x] = chars.fishR
         return
 

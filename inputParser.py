@@ -8,6 +8,7 @@ commands = {
         "e": "Edit Mode",
         "b": "Brush Mode",
         "s": "Sys Mode",
+        "p": "Pause",
     },
     "brush": {
         "s": "Stream",
@@ -18,10 +19,11 @@ commands = {
     "sys": {
         "q": "Quit",
         "s": "Save",
-        "c": "Term Clear",
+        "l": "Load",
         "r": "Reset",
         "k": "Sim spd+",
         "j": "Sim spd-",
+        "c": "Term Clear",
         "esc": "Norm Mode",
     },
     "edit": {
