@@ -2,14 +2,14 @@
 ## Its a sand simulation!!
 - you can simulate sand (and more) from your command line!
 - it falls down
-- just like noita fr (but with text)
+- just like noita fr
 - includes:
     - sand
     - water
     - fish
     - ghost fish!?
     - modal editing
-- made in 1 week for Univerist of Calgary Text Based Game Jam
+- made in 1 week for Univeristy of Calgary Text Based Game Jam
 
 ## Running
 - install pynput dependency 
