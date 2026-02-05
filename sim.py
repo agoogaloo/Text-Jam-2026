@@ -59,6 +59,8 @@ def simTile(x: int, y: int, stateBuffer: List[List[str]]):
         fishRsim(x, y, stateBuffer)
     elif currState[y][x] == chars.grave:
         gravesim(x, y, stateBuffer)
+    elif currState[y][x] == chars.ghost:
+        ghostSim(x, y, stateBuffer)
 
     return
 
@@ -135,8 +137,10 @@ def swapTile(
 
 
 def getCh(x: int, y: int, state: List[List[str]]):
-    if 0 < x <= width or 0 < y <= height:
+    if 0 <= x < width and 0 <= y < height:
+        # print(f"x:{x} y:{y} in range")
         return state[y][x]
+    print(f"x:{x} y:{y} out of range")
     return chars.wall
 
 
@@ -265,7 +269,29 @@ def fishLsim(x: int, y: int, state: List[List[str]]):
 
 
 def gravesim(x: int, y: int, state: List[List[str]]):
-    swapTile(x, y, x, y + 1, chars.grave, [chars.water], state)
+
+    if swapTile(x, y, x, y + 1, chars.grave, [chars.water], state):
+        return
+
+    # become ghost id touching 3 graves
+    count = -1 # we will end up counting ourselves
+    for cy in range(y-1,y+2):
+        for cx in range(x-1,x+2):
+            if getCh(cx,cy, state) == chars.grave:
+                count+=1
+    if count>=3:
+        state[y][x] = chars.ghost
+
+def ghostSim(x: int, y: int, state: List[List[str]]):
+    # dissapear at top of screen
+    if y<=0:
+        state[y][x] = chars.empty
+        return
+
+    # move up
+    state[y][x]= state[y-1][x]
+    state[y-1][x] = chars.ghost
+
 
 
 def input(inp: str):

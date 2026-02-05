@@ -5,7 +5,7 @@ import sim
 import inputParser as inp
 
 title = "SAND SIMULATOR!"
-shouldClear = False
+shouldClear = True
 paused = False
 
 screenWidth = sim.width

@@ -38,7 +38,6 @@ def on_press(key):
         simDelay/=1.25;
     elif inp == "Quit":
         run = False
-        input("enter to quit")
 
     elif inp != "None":
         time.sleep(0.0005)
