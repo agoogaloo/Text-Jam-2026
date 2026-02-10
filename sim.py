@@ -140,7 +140,7 @@ def getCh(x: int, y: int, state: List[List[str]]):
     if 0 <= x < width and 0 <= y < height:
         # print(f"x:{x} y:{y} in range")
         return state[y][x]
-    print(f"x:{x} y:{y} out of range")
+    # print(f"x:{x} y:{y} out of range")
     return chars.wall
 
 
